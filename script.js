@@ -29,6 +29,9 @@ document
       alert("Veri alınamadı veya hata oluştu.");
       return;
     }
+    console.log("📥 Response:", data);
+    console.log("📤 API URL:", apiUrl);
+    console.log("📦 Payload:", payload);
     renderTable(data);
     renderChart(data);
     window._lastData = data; // excel export için sakla
