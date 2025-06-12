@@ -1,0 +1,72 @@
+<!DOCTYPE html>
+<html lang="en">
+<link rel="stylesheet" href="style.css">
+
+<head>
+    <meta charset="UTF-8">
+    <title>UN Comtrade Data Viewer</title>
+    <script src="chart.min.js"></script>
+    <script src="file-saver.min.js"></script>
+</head>
+
+<body>
+    <h2>UN Comtrade Sorgu</h2>
+
+    <form id="queryForm">
+        <label>Reporter Country (çoklu):</label><br>
+        <select multiple name="reporterCode" id="reporterCode">
+            <option value="792">Turkey</option>
+            <option value="36">Australia</option>
+            <option value="124">Canada</option>
+            <!-- Daha fazla ülke eklenebilir -->
+        </select><br><br>
+
+        <label>Partner Country (çoklu):</label><br>
+        <select multiple name="partnerCode" id="partnerCode">
+            <option value="156">China</option>
+            <option value="840">USA</option>
+        </select><br><br>
+
+        <label>HS Code:</label>
+        <input type="text" id="cmdCode" placeholder="Örn: 2701"><br><br>
+
+        <label>Period:</label>
+        <input type="text" id="period" placeholder="YYYY veya YYYYMM"><br><br>
+
+        <label>Flow:</label>
+        <select id="flowCode">
+            <option value="M">Import</option>
+            <option value="X">Export</option>
+        </select><br><br>
+
+        <label>Frequency:</label>
+        <select id="freqCode">
+            <option value="M">Monthly</option>
+            <option value="A">Annual</option>
+        </select><br><br>
+
+        <button type="submit">Get Data</button>
+        <button type="button" onclick="exportToExcel()">Export to Excel</button>
+    </form>
+
+    <hr>
+
+    <canvas id="chartCanvas" width="800" height="300"></canvas>
+    <table border="1" id="dataTable">
+        <thead>
+            <tr>
+                <th>Reporter</th>
+                <th>Partner</th>
+                <th>Product</th>
+                <th>Period</th>
+                <th>FOB Value</th>
+                <th>Net Weight</th>
+            </tr>
+        </thead>
+        <tbody></tbody>
+    </table>
+
+    <script src="script.js"></script>
+</body>
+
+</html>
