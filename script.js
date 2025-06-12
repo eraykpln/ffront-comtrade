@@ -25,6 +25,10 @@ document
     });
 
     const data = await response.json();
+    if (!Array.isArray(data)) {
+      alert("Veri alınamadı veya hata oluştu.");
+      return;
+    }
     renderTable(data);
     renderChart(data);
     window._lastData = data; // excel export için sakla
