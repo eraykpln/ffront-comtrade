@@ -102,3 +102,23 @@ th {
 tr:nth-child(even) {
   background-color: #f9f9f9;
 }
+
+/* Kolon filtreleme */
+.column-filter {
+  margin: 20px 0;
+  padding: 10px 15px;
+  background-color: #fff;
+  border-radius: 8px;
+  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.03);
+}
+
+.column-filter label {
+  margin-right: 15px;
+  font-size: 14px;
+  color: #444;
+}
+
+.column-filter input[type="checkbox"] {
+  margin-right: 5px;
+  vertical-align: middle;
+}

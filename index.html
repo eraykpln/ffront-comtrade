@@ -6,47 +6,11 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <meta charset="UTF-8" />
     <title>Comtrade API Tester</title>
-    <style>
-        body {
-            font-family: sans-serif;
-            padding: 20px;
-        }
-
-        .flex {
-            display: flex;
-            gap: 20px;
-        }
-
-        form {
-            flex: 1;
-            border: 1px solid #ccc;
-            padding: 15px;
-            border-radius: 5px;
-        }
-
-        table {
-            border-collapse: collapse;
-            margin-top: 20px;
-            width: 100%;
-        }
-
-        th,
-        td {
-            border: 1px solid #ccc;
-            padding: 5px;
-        }
-
-        th {
-            background: #eee;
-        }
-    </style>
 </head>
 
 <body>
-
     <h2>Comtrade API Query Panel</h2>
     <div class="flex">
-        <!-- Final Data Form -->
         <form id="finalForm">
             <h3>Final Data Query</h3>
             <input name="typeCode" placeholder="typeCode" value="C" required><br>
@@ -59,7 +23,6 @@
             <button type="submit">Fetch Final Data</button>
         </form>
 
-        <!-- Tariffline Data Form -->
         <form id="tariffForm">
             <h3>Tariffline Data Query</h3>
             <input name="typeCode" placeholder="typeCode" value="C" required><br>
@@ -73,23 +36,54 @@
         </form>
     </div>
 
-    <!-- Table Output -->
     <div id="results">
         <h3>Results:</h3>
+        <div class="column-filter" id="columnFilterContainer">
+            <label><input type="checkbox" value="refPeriodId" checked>Dönem</label>
+            <label><input type="checkbox" value="reporterDesc" checked>reporterDesc</label>
+            <label><input type="checkbox" value="partnerDesc" checked>partnerDesc</label>
+            <label><input type="checkbox" value="customsCode" checked>customsCode</label>
+            <label><input type="checkbox" value="motDesc" checked>motDesc</label>
+            <label><input type="checkbox" value="altQty" checked>altQty</label>
+            <label><input type="checkbox" value="netWgt" checked>netWgt</label>
+            <label><input type="checkbox" value="grossWgt" checked>grossWgt</label>
+            <label><input type="checkbox" value="cifvalue" checked>cifvalue</label>
+            <label><input type="checkbox" value="fobvalue" checked>fobvalue</label>
+            <label><input type="checkbox" value="primaryValue" checked>primaryValue</label>
+        </div>
         <div id="tableContainer">No data yet.</div>
     </div>
 
     <script>
-        const CLOUD_RUN_BASE = "https://uncomtrade-web-app-903823352744.europe-west1.run.app"; // 👈 buraya senin URL
+        const CLOUD_RUN_BASE = "https://uncomtrade-web-app-903823352744.europe-west1.run.app";
+        let lastData = null;
+
+        function getSelectedColumns() {
+            return Array.from(document.querySelectorAll('.column-filter input:checked')).map(i => i.value);
+        }
 
         function renderTable(data) {
+            lastData = data;
+
             if (!data || data.length === 0) {
                 document.getElementById('tableContainer').innerHTML = "<p>No data found.</p>";
                 return;
             }
-            let keys = Object.keys(data[0]);
-            let html = "<table><thead><tr>" + keys.map(k => `<th>${k}</th>`).join('') + "</tr></thead><tbody>";
-            html += data.map(row => "<tr>" + keys.map(k => `<td>${row[k] ?? ""}</td>`).join('') + "</tr>").join('');
+
+            const selectedColumns = getSelectedColumns();
+            let html = "<table><thead><tr>" + selectedColumns.map(k => `<th>${k}</th>`).join('') + "</tr></thead><tbody>";
+
+            html += data.map(row => {
+                return "<tr>" + selectedColumns.map(k => {
+                    let value = row[k] ?? "";
+                    if (k === "motDesc") {
+                        if (value.toLowerCase().includes("air")) value = "✈️ " + value;
+                        else if (value.toLowerCase().includes("sea")) value = "🚢 " + value;
+                    }
+                    return `<td>${value}</td>`;
+                }).join('') + "</tr>";
+            }).join('');
+
             html += "</tbody></table>";
             document.getElementById('tableContainer').innerHTML = html;
         }
@@ -110,8 +104,15 @@
             e.preventDefault();
             await handleForm("tariffline-data", e.target);
         });
+
+        document.querySelectorAll('.column-filter input').forEach(cb => {
+            cb.addEventListener('change', () => {
+                if (lastData) renderTable(lastData);
+            });
+        });
     </script>
-    <div> &copy; True Digital Team 2025</div>
+
+    <div>&copy; True Digital Team 2025</div>
 </body>
 
 </html>
