@@ -41,7 +41,8 @@
         <h3>Results:</h3>
         <div class="column-filter" id="columnFilterContainer"></div>
 
-        <div id="chartContainer">
+        <button onclick="toggleCharts()" id="toggleChartBtn">📊 Show Charts</button>
+        <div id="chartContainer" style="display:none">
             <h4 id="chart1Title">Chart 1</h4>
             <canvas id="chart1" height="120"></canvas>
             <h4 id="chart2Title">Chart 2</h4>
@@ -67,6 +68,18 @@
             "refPeriodId", "reporterDesc", "partnerDesc", "cmdCode", "cmdDesc",
             "qty", "qtyUnitAbbr", "altQty", "netWgt", "grossWgt", "fobvalue"
         ];
+
+        function toggleCharts() {
+            const chartDiv = document.getElementById("chartContainer");
+            const btn = document.getElementById("toggleChartBtn");
+            if (chartDiv.style.display === "none") {
+                chartDiv.style.display = "block";
+                btn.innerText = "📉 Hide Charts";
+            } else {
+                chartDiv.style.display = "none";
+                btn.innerText = "📊 Show Charts";
+            }
+        }
 
         function renderColumnFilter(columns, defaultChecked) {
             const container = document.getElementById("columnFilterContainer");
