@@ -2,76 +2,114 @@
 <html lang="en">
 
 <head>
-    <meta charset="UTF-8">
-    <title>UN Comtrade Data Viewer</title>
-    <link rel="stylesheet" href="style.css">
-    <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.1/dist/chart.umd.min.js"></script>
-    <script src="https://cdn.jsdelivr.net/npm/file-saver@2.0.5/dist/FileSaver.min.js"></script>
+    <meta charset="UTF-8" />
+    <title>Comtrade API Tester</title>
+    <style>
+        body {
+            font-family: sans-serif;
+            padding: 20px;
+        }
+
+        .flex {
+            display: flex;
+            gap: 20px;
+        }
+
+        form {
+            flex: 1;
+            border: 1px solid #ccc;
+            padding: 15px;
+            border-radius: 5px;
+        }
+
+        table {
+            border-collapse: collapse;
+            margin-top: 20px;
+            width: 100%;
+        }
+
+        th,
+        td {
+            border: 1px solid #ccc;
+            padding: 5px;
+        }
+
+        th {
+            background: #eee;
+        }
+    </style>
 </head>
 
 <body>
-    <h2>UN Comtrade Sorgu</h2>
 
-    <form id="queryForm">
-        <label>Reporter Country (çoklu):</label><br>
-        <select multiple name="reporterCode" id="reporterCode">
-            <option value="792">Turkey</option>
-            <option value="36">Australia</option>
-            <option value="124">Canada</option>
-            <!-- Daha fazla ülke eklenebilir -->
-        </select><br><br>
+    <h2>Comtrade API Query Panel</h2>
+    <div class="flex">
+        <!-- Final Data Form -->
+        <form id="finalForm">
+            <h3>Final Data Query</h3>
+            <input name="typeCode" placeholder="typeCode" value="C" required><br>
+            <input name="freqCode" placeholder="freqCode" value="M" required><br>
+            <input name="clCode" placeholder="clCode" value="HS" required><br>
+            <input name="period" placeholder="period" value="202205" required><br>
+            <input name="reporterCode" placeholder="reporterCode" value="36" required><br>
+            <input name="cmdCode" placeholder="cmdCode" value="91" required><br>
+            <input name="flowCode" placeholder="flowCode" value="M" required><br>
+            <button type="submit">Fetch Final Data</button>
+        </form>
 
-        <label>Partner Country (çoklu):</label><br>
-        <select multiple name="partnerCode" id="partnerCode">
-            <option value="">🌍 All World</option>
-            <option value="156">China</option>
-            <option value="840">USA</option>
-        </select><br><br>
+        <!-- Tariffline Data Form -->
+        <form id="tariffForm">
+            <h3>Tariffline Data Query</h3>
+            <input name="typeCode" placeholder="typeCode" value="C" required><br>
+            <input name="freqCode" placeholder="freqCode" value="M" required><br>
+            <input name="clCode" placeholder="clCode" value="HS" required><br>
+            <input name="period" placeholder="period" value="202205" required><br>
+            <input name="reporterCode" placeholder="reporterCode" value="36" required><br>
+            <input name="cmdCode" placeholder="cmdCode" value="91" required><br>
+            <input name="flowCode" placeholder="flowCode" value="M" required><br>
+            <button type="submit">Fetch Tariffline Data</button>
+        </form>
+    </div>
 
-        <label>HS Code:</label>
-        <input type="text" id="cmdCode" placeholder="Örn: 2701"><br><br>
+    <!-- Table Output -->
+    <div id="results">
+        <h3>Results:</h3>
+        <div id="tableContainer">No data yet.</div>
+    </div>
 
-        <label>Period:</label>
-        <input type="text" id="period" placeholder="YYYY veya YYYYMM"><br><br>
+    <script>
+        const CLOUD_RUN_BASE = "https://YOUR_CLOUD_RUN_URL"; // 👈 buraya senin URL
 
-        <label>Flow:</label>
-        <select id="flowCode">
-            <option value="M">Import</option>
-            <option value="X">Export</option>
-        </select><br><br>
+        function renderTable(data) {
+            if (!data || data.length === 0) {
+                document.getElementById('tableContainer').innerHTML = "<p>No data found.</p>";
+                return;
+            }
+            let keys = Object.keys(data[0]);
+            let html = "<table><thead><tr>" + keys.map(k => `<th>${k}</th>`).join('') + "</tr></thead><tbody>";
+            html += data.map(row => "<tr>" + keys.map(k => `<td>${row[k] ?? ""}</td>`).join('') + "</tr>").join('');
+            html += "</tbody></table>";
+            document.getElementById('tableContainer').innerHTML = html;
+        }
 
-        <label>Frequency:</label>
-        <select id="freqCode">
-            <option value="M">Monthly</option>
-            <option value="A">Annual</option>
-        </select><br><br>
+        async function handleForm(endpoint, form) {
+            const params = new URLSearchParams(new FormData(form)).toString();
+            const res = await fetch(`${CLOUD_RUN_BASE}/${endpoint}?${params}`);
+            const json = await res.json();
+            renderTable(json);
+        }
 
-        <button type="submit">Get Data</button>
-        <button type="button" onclick="exportToExcel()">Export to Excel</button>
-    </form>
+        document.getElementById('finalForm').addEventListener('submit', async (e) => {
+            e.preventDefault();
+            await handleForm("final-data", e.target);
+        });
 
-    <hr>
-
-    <canvas id="chartCanvas" width="800" height="300"></canvas>
-    <table border="1" id="dataTable">
-        <thead>
-            <tr>
-                <th>Reporter</th>
-                <th>Partner</th>
-                <th>Product</th>
-                <th>Period</th>
-                <th>FOB Value</th>
-                <th>Net Weight</th>
-            </tr>
-        </thead>
-        <tbody></tbody>
-    </table>
-
-    <footer style="margin-top: 40px; text-align: center; font-size: 0.9em; color: #888;">
-        &copy; 2025 True Digital Team
-    </footer>
-
-    <script src="script.js"></script>
+        document.getElementById('tariffForm').addEventListener('submit', async (e) => {
+            e.preventDefault();
+            await handleForm("tariffline-data", e.target);
+        });
+    </script>
+    <div> &copy; True Digital Team 2025 </div>
 </body>
 
 </html>
