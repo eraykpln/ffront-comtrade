@@ -6,6 +6,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <meta charset="UTF-8" />
     <title>Comtrade API Tester</title>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 </head>
 
 <body>
@@ -39,12 +40,16 @@
     <div id="results">
         <h3>Results:</h3>
         <div class="column-filter" id="columnFilterContainer"></div>
+        <div id="chartContainer">
+            <canvas id="myChart" height="120"></canvas>
+        </div>
         <div id="tableContainer">No data yet.</div>
     </div>
 
     <script>
         const CLOUD_RUN_BASE = "https://uncomtrade-web-app-903823352744.europe-west1.run.app";
         let lastData = null;
+        let chartInstance = null;
 
         const finalDefaultCols = [
             "refPeriodId", "reporterDesc", "partnerDesc", "customsCode", "motDesc",
@@ -72,6 +77,35 @@
             return Array.from(document.querySelectorAll('#columnFilterContainer input:checked')).map(i => i.value);
         }
 
+        function renderChart(data) {
+            const ctx = document.getElementById('myChart').getContext('2d');
+            const labels = data.map(d => d.partnerDesc || d.cmdDesc || d.reporterDesc);
+            const values = data.map(d => Number(d.primaryValue || d.fobvalue || d.netWgt || 0));
+
+            if (chartInstance) chartInstance.destroy();
+            chartInstance = new Chart(ctx, {
+                type: 'bar',
+                data: {
+                    labels: labels.slice(0, 15),
+                    datasets: [{
+                        label: 'Top Values',
+                        data: values.slice(0, 15),
+                        backgroundColor: '#007acc'
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    plugins: {
+                        legend: { display: false },
+                        tooltip: { mode: 'index', intersect: false }
+                    },
+                    scales: {
+                        y: { beginAtZero: true }
+                    }
+                }
+            });
+        }
+
         function renderTable(data) {
             lastData = data;
             const selectedColumns = getSelectedColumns();
@@ -90,6 +124,7 @@
 
             html += "</tbody></table>";
             document.getElementById("tableContainer").innerHTML = html;
+            renderChart(data);
         }
 
         async function handleForm(endpoint, form, defaultCols) {

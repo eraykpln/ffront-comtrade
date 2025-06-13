@@ -75,6 +75,14 @@ form button:hover {
   margin-top: 40px;
 }
 
+#chartContainer {
+  background-color: white;
+  border-radius: 10px;
+  padding: 15px;
+  margin-bottom: 20px;
+  box-shadow: 0 2px 10px rgba(0, 0, 0, 0.05);
+}
+
 #tableContainer {
   overflow-x: auto;
   background-color: white;
