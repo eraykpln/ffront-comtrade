@@ -1,121 +1,134 @@
-<!DOCTYPE html>
-<html lang="en">
+/* Genel stiller */
+body {
+  font-family: "Segoe UI", sans-serif;
+  background-color: #f4f6fa;
+  margin: 0;
+  padding: 30px;
+  color: #222;
+}
 
-<head>
-  <link rel="stylesheet" href="style.css" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <meta charset="UTF-8" />
-  <title>Comtrade API Tester</title>
-</head>
+h2 {
+  text-align: center;
+  margin-bottom: 30px;
+  color: #333;
+}
 
-<body>
-  <h2>Comtrade API Query Panel</h2>
-  <div class="flex">
-    <form id="finalForm">
-      <h3>Final Data Query</h3>
-      <input name="typeCode" value="C" required><br>
-      <input name="freqCode" value="M" required><br>
-      <input name="clCode" value="HS" required><br>
-      <input name="period" value="202205" required><br>
-      <input name="reporterCode" value="36" required><br>
-      <input name="cmdCode" value="91" required><br>
-      <input name="flowCode" value="M" required><br>
-      <button type="submit">Fetch Final Data</button>
-    </form>
+/* Form yapısı */
+.flex {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 20px;
+  justify-content: space-between;
+}
 
-    <form id="tariffForm">
-      <h3>Tariffline Data Query</h3>
-      <input name="typeCode" value="C" required><br>
-      <input name="freqCode" value="M" required><br>
-      <input name="clCode" value="HS" required><br>
-      <input name="period" value="202205" required><br>
-      <input name="reporterCode" value="36" required><br>
-      <input name="cmdCode" value="91" required><br>
-      <input name="flowCode" value="M" required><br>
-      <button type="submit">Fetch Tariffline Data</button>
-    </form>
-  </div>
+form {
+  flex: 1;
+  min-width: 300px;
+  background-color: #fff;
+  border-radius: 10px;
+  box-shadow: 0 2px 10px rgba(0, 0, 0, 0.05);
+  padding: 20px;
+  box-sizing: border-box;
+}
 
-  <div id="results">
-    <h3>Results:</h3>
-    <div class="column-filter" id="columnFilterContainer"></div>
-    <div id="tableContainer">No data yet.</div>
-  </div>
+form h3 {
+  margin-top: 0;
+  font-size: 18px;
+  color: #222;
+  margin-bottom: 15px;
+}
 
-  <script>
-    const CLOUD_RUN_BASE = "https://uncomtrade-web-app-903823352744.europe-west1.run.app";
-    let lastData = null;
+form input {
+  width: 100%;
+  margin-bottom: 10px;
+  padding: 10px 12px;
+  border-radius: 6px;
+  border: 1px solid #ccc;
+  transition: border 0.2s ease;
+  font-size: 14px;
+  box-sizing: border-box;
+}
 
-    const finalDefaultCols = [
-      "refPeriodId", "reporterDesc", "partnerDesc", "customsCode", "motDesc",
-      "altQty", "netWgt", "grossWgt", "cifvalue", "fobvalue", "primaryValue"
-    ];
+form input:focus {
+  outline: none;
+  border-color: #007acc;
+}
 
-    const tariffDefaultCols = [
-      "refPeriodId", "reporterDesc", "partnerDesc", "cmdCode", "cmdDesc",
-      "qty", "qtyUnitAbbr", "altQty", "netWgt", "grossWgt", "fobvalue"
-    ];
+form button {
+  width: 100%;
+  background-color: #007acc;
+  color: white;
+  border: none;
+  padding: 10px 0;
+  border-radius: 6px;
+  font-size: 14px;
+  cursor: pointer;
+  transition: background-color 0.2s ease;
+}
 
-    function renderColumnFilter(columns, defaultChecked) {
-      const container = document.getElementById("columnFilterContainer");
-      container.innerHTML = "";
-      const allKeys = Object.keys(columns[0] ?? {});
-      allKeys.forEach(key => {
-        const isChecked = defaultChecked.includes(key);
-        const label = document.createElement("label");
-        label.innerHTML = `<input type="checkbox" value="${key}" ${isChecked ? "checked" : ""}>${key}`;
-        container.appendChild(label);
-      });
-    }
+form button:hover {
+  background-color: #005fa3;
+}
 
-    function getSelectedColumns() {
-      return Array.from(document.querySelectorAll('#columnFilterContainer input:checked')).map(i => i.value);
-    }
+/* Tablo */
+#results {
+  margin-top: 40px;
+}
 
-    function renderTable(data) {
-      lastData = data;
-      const selectedColumns = getSelectedColumns();
-      let html = "<table><thead><tr>" + selectedColumns.map(k => `<th>${k}</th>`).join("") + "</tr></thead><tbody>";
+#tableContainer {
+  overflow-x: auto;
+  background-color: white;
+  border-radius: 10px;
+  padding: 15px;
+  box-shadow: 0 2px 10px rgba(0, 0, 0, 0.05);
+  margin-top: 20px;
+}
 
-      html += data.map(row => {
-        return "<tr>" + selectedColumns.map(k => {
-          let value = row[k] ?? "";
-          if (k === "motDesc") {
-            if (value.toLowerCase().includes("air")) value = "✈️ " + value;
-            else if (value.toLowerCase().includes("sea")) value = "🚢 " + value;
-          }
-          return `<td>${value}</td>`;
-        }).join("") + "</tr>";
-      }).join("");
+table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 13px;
+  min-width: 600px;
+}
 
-      html += "</tbody></table>";
-      document.getElementById("tableContainer").innerHTML = html;
-    }
+th,
+td {
+  padding: 10px 12px;
+  border: 1px solid #e0e0e0;
+  text-align: left;
+}
 
-    async function handleForm(endpoint, form, defaultCols) {
-      const params = new URLSearchParams(new FormData(form)).toString();
-      const res = await fetch(`${CLOUD_RUN_BASE}/${endpoint}?${params}`);
-      const json = await res.json();
-      renderColumnFilter(json, defaultCols);
-      renderTable(json);
-    }
+th {
+  background-color: #f0f2f5;
+  font-weight: bold;
+}
 
-    document.getElementById("finalForm").addEventListener("submit", async (e) => {
-      e.preventDefault();
-      await handleForm("final-data", e.target, finalDefaultCols);
-    });
+tr:nth-child(even) {
+  background-color: #fafafa;
+}
 
-    document.getElementById("tariffForm").addEventListener("submit", async (e) => {
-      e.preventDefault();
-      await handleForm("tariffline-data", e.target, tariffDefaultCols);
-    });
+/* Kolon filtreleme */
+.column-filter {
+  margin: 20px 0 10px;
+  padding: 15px 20px;
+  background-color: #fff;
+  border-radius: 10px;
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.04);
+  display: flex;
+  flex-wrap: wrap;
+  gap: 15px;
+}
 
-    document.getElementById("columnFilterContainer").addEventListener("change", () => {
-      if (lastData) renderTable(lastData);
-    });
-  </script>
+.column-filter label {
+  font-size: 14px;
+  color: #333;
+  display: flex;
+  align-items: center;
+  gap: 5px;
+}
 
-  <div>&copy; True Digital Team 2025</div>
-</body>
-
-</html>
+.column-filter input[type="checkbox"] {
+  margin: 0;
+  transform: scale(1.1);
+  cursor: pointer;
+}
