@@ -36,7 +36,14 @@
             <button type="submit">Fetch Tariffline Data</button>
         </form>
     </div>
-
+    <button onclick="togglePieSection()" id="togglePieBtn">🥧 Show Pie Chart</button>
+    <div id="pieChartSection" style="display:none; margin-top:20px;">
+        <h4>Select Column for Pie Chart:</h4>
+        <select id="pieColumnSelect"></select>
+        <div style="display:flex; gap: 20px; align-items: center;">
+            <canvas id="pieChart" width="300" height="300"></canvas>
+        </div>
+    </div>
     <div id="results">
         <h3>Results:</h3>
         <div class="column-filter" id="columnFilterContainer"></div>
@@ -243,7 +250,66 @@
             if (lastData) renderTable(lastData);
         });
     </script>
+    <script>let pieChartInstance = null;
 
+        function togglePieSection() {
+            const section = document.getElementById("pieChartSection");
+            const btn = document.getElementById("togglePieBtn");
+            if (section.style.display === "none") {
+                section.style.display = "block";
+                btn.innerText = "🥧 Hide Pie Chart";
+                populatePieColumnSelect();
+            } else {
+                section.style.display = "none";
+                btn.innerText = "🥧 Show Pie Chart";
+                if (pieChartInstance) pieChartInstance.destroy();
+            }
+        }
+
+        function populatePieColumnSelect() {
+            const select = document.getElementById("pieColumnSelect");
+            select.innerHTML = "";
+            const columns = getSelectedColumns();
+            columns.forEach(col => {
+                const option = document.createElement("option");
+                option.value = col;
+                option.text = columnNameMap[col] || col;
+                select.appendChild(option);
+            });
+            select.addEventListener("change", () => renderPieChart(select.value));
+            if (columns.length) renderPieChart(columns[0]);
+        }
+
+        function renderPieChart(columnName) {
+            if (!lastData || !columnName) return;
+
+            const grouped = {};
+            lastData.forEach(row => {
+                const key = row[columnName] ?? "Unknown";
+                grouped[key] = (grouped[key] || 0) + 1;
+            });
+
+            const labels = Object.keys(grouped);
+            const values = Object.values(grouped);
+
+            const ctx = document.getElementById("pieChart").getContext("2d");
+            if (pieChartInstance) pieChartInstance.destroy();
+
+            pieChartInstance = new Chart(ctx, {
+                type: "pie",
+                data: {
+                    labels: labels,
+                    datasets: [{
+                        label: columnName,
+                        data: values,
+                        backgroundColor: labels.map((_, i) =>
+                            `hsl(${(i * 47) % 360}, 70%, 60%)`
+                        )
+                    }]
+                },
+                options: { responsive: true }
+            });
+        }</script>
     <div>&copy; True Digital Team 2025</div>
 </body>
 
