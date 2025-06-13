@@ -60,14 +60,26 @@
         let activeForm = "final";
 
         const finalDefaultCols = [
-            "refPeriodId", "reporterDesc", "partnerDesc", "customsCode", "motDesc",
-            "altQty", "netWgt", "grossWgt", "cifvalue", "fobvalue", "primaryValue"
+            "refPeriodId", "partnerDesc", "cmdDesc", "cmdCode",
+            "cifvalue", "fobvalue", "netWgt", "altQty", "reporterDesc"
         ];
 
         const tariffDefaultCols = [
             "refPeriodId", "reporterDesc", "partnerDesc", "cmdCode", "cmdDesc",
             "qty", "qtyUnitAbbr", "altQty", "netWgt", "grossWgt", "fobvalue"
         ];
+
+        const columnNameMap = {
+            refPeriodId: "DATE",
+            partnerDesc: "Partner Country",
+            cmdDesc: "HS P. Description",
+            cmdCode: "HS CODE",
+            cifvalue: "CIF Value ($)",
+            fobvalue: "FOB Value ($)",
+            netWgt: "Net Weight",
+            altQty: "Alternative Quantity",
+            reporterDesc: "Reporter Country"
+        };
 
         function toggleCharts() {
             const chartDiv = document.getElementById("chartContainer");
@@ -87,8 +99,9 @@
             const allKeys = Object.keys(columns[0] ?? {});
             allKeys.forEach(key => {
                 const isChecked = defaultChecked.includes(key);
+                const labelText = columnNameMap[key] || key;
                 const label = document.createElement("label");
-                label.innerHTML = `<input type="checkbox" value="${key}" ${isChecked ? "checked" : ""}>${key}`;
+                label.innerHTML = `<input type="checkbox" value="${key}" ${isChecked ? "checked" : ""}>${labelText}`;
                 container.appendChild(label);
             });
         }
@@ -185,7 +198,7 @@
         function renderTable(data) {
             lastData = data;
             const selectedColumns = getSelectedColumns();
-            let html = "<table><thead><tr>" + selectedColumns.map(k => `<th>${k}</th>`).join("") + "</tr></thead><tbody>";
+            let html = "<table><thead><tr>" + selectedColumns.map(k => `<th>${columnNameMap[k] || k}</th>`).join("") + "</tr></thead><tbody>";
 
             html += data.map(row => {
                 return "<tr>" + selectedColumns.map(k => {
