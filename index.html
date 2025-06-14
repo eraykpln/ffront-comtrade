@@ -30,8 +30,10 @@
             <input name="freqCode" value="M" required><br>
             <input name="clCode" value="HS" required><br>
             <input name="period" value="202205" required><br>
-            <input name="reporterCode" value="36" required><br>
-            <input name="cmdCode" value="91" required><br>
+            <select id="reporterCode" name="reporterCode" required></select><br>
+            <label>Partner Country</label>
+            <select id="partnerCode" name="partnerCode" required></select><br> <input name="cmdCode" value="91"
+                required><br>
             <input name="flowCode" value="M" required><br>
             <button type="submit">Fetch Tariffline Data</button>
         </form>
@@ -310,6 +312,50 @@
                 options: { responsive: true }
             });
         }</script>
+    <script>
+        const countries = [
+            { code: "0", name: "World" },
+            { code: "4", name: "Afghanistan" },
+            { code: "8", name: "Albania" },
+            { code: "12", name: "Algeria" },
+            { code: "36", name: "Australia" },
+            { code: "40", name: "Austria" },
+            { code: "50", name: "Bangladesh" },
+            { code: "76", name: "Brazil" },
+            { code: "124", name: "Canada" },
+            { code: "156", name: "China" },
+            { code: "276", name: "Germany" },
+            { code: "356", name: "India" },
+            { code: "392", name: "Japan" },
+            { code: "643", name: "Russia" },
+            { code: "792", name: "Turkey" },
+            { code: "826", name: "United Kingdom" },
+            { code: "840", name: "United States" }
+            // Tüm listeyi uzatabilirim istersen
+        ];
+
+        function populateCountrySelect(elementId) {
+            const select = document.getElementById(elementId);
+            countries.forEach(c => {
+                const option = document.createElement("option");
+                option.value = c.code;
+                option.text = c.name;
+                select.appendChild(option);
+            });
+
+            new Choices(select, {
+                searchEnabled: true,
+                itemSelectText: '',
+                shouldSort: true
+            });
+        }
+
+        // Form açıldığında select'leri doldur
+        document.addEventListener("DOMContentLoaded", () => {
+            populateCountrySelect("reporterCode");
+            populateCountrySelect("partnerCode");
+        });
+    </script>
     <div>&copy; True Digital Team 2025</div>
 </body>
 
