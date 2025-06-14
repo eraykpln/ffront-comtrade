@@ -2,86 +2,113 @@
 <html lang="en">
 
 <head>
-    <link rel="stylesheet" href="style.css" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>Comtrade API Tester</title>
+    <link rel="stylesheet" href="style.css" />
+    <!-- Choices.js for searchable dropdowns -->
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/choices.js/public/assets/styles/choices.min.css" />
+    <script src="https://cdn.jsdelivr.net/npm/choices.js/public/assets/scripts/choices.min.js"></script>
+    <!-- Chart.js for charts -->
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 </head>
 
 <body>
     <h2>Comtrade API Query Panel</h2>
+
     <div class="flex">
+        <!-- ========================= FINAL DATA FORM ========================= -->
         <form id="finalForm">
             <h3>Final Data Query</h3>
-            <label for="typeCode">Data Type:</label>
-            <select name="typeCode" id="typeCode" required>
+            <label for="typeCodeFinal">Data Type:</label>
+            <select name="typeCode" id="typeCodeFinal" required>
                 <option value="C">Commodity</option>
                 <option value="S">Services</option>
-            </select><br>
-            <label for="freqCode">Frequency:</label>
-            <select name="freqCode" id="freqCode" required>
+            </select><br />
+
+            <label for="freqCodeFinal">Frequency:</label>
+            <select name="freqCode" id="freqCodeFinal" required>
                 <option value="M">Monthly</option>
                 <option value="A">Annual</option>
-            </select><br>
-            <label for="clCode">Classification Code:</label>
-            <input name="clCode" id="clCode" value="HS" required><br>
-            <label for="period">Period:</label>
-            <input name="period" id="period" value="202205" required><br>
-            <label for="reporterCode">Reporter Country:</label>
-            <select id="reporterCode" name="reporterCode"></select><br>
-            <label for="partnerCode">Partner Country:</label>
-            <select id="partnerCode" name="partnerCode" required></select><br>
-            <label for="cmdCode">Commodity Code:</label>
-            <input name="cmdCode" id="cmdCode" value="91" required><br>
-            <label for="flowCode">Trade Flow:</label>
-            <select name="flowCode" id="flowCode" required>
+            </select><br />
+
+            <label for="clCodeFinal">Classification Code:</label>
+            <input name="clCode" id="clCodeFinal" value="HS" required /><br />
+
+            <label for="periodFinal">Period (YYYYMM):</label>
+            <input name="period" id="periodFinal" value="202205" pattern="\d{6}" required /><br />
+
+            <label for="reporterCodeFinal">Reporter Country:</label>
+            <select id="reporterCodeFinal" name="reporterCode" required></select><br />
+
+            <label for="partnerCodeFinal">Partner Country:</label>
+            <select id="partnerCodeFinal" name="partnerCode" required></select><br />
+
+            <label for="cmdCodeFinal">Commodity Code (HS6):</label>
+            <input name="cmdCode" id="cmdCodeFinal" value="91" required /><br />
+
+            <label for="flowCodeFinal">Trade Flow:</label>
+            <select name="flowCode" id="flowCodeFinal" required>
                 <option value="M">Import</option>
                 <option value="X">Export</option>
-            </select><br>
+            </select><br />
+
             <button type="submit">Fetch Final Data</button>
         </form>
 
+        <!-- ========================= TARIFF LINE FORM ========================= -->
         <form id="tariffForm">
             <h3>Tariffline Data Query</h3>
-            <label for="typeCode">Data Type:</label>
-            <select name="typeCode" id="typeCode" required>
+            <label for="typeCodeTariff">Data Type:</label>
+            <select name="typeCode" id="typeCodeTariff" required>
                 <option value="C">Commodity</option>
                 <option value="S">Services</option>
-            </select><br>
-            <label for="freqCode">Frequency:</label>
-            <select name="freqCode" id="freqCode" required>
+            </select><br />
+
+            <label for="freqCodeTariff">Frequency:</label>
+            <select name="freqCode" id="freqCodeTariff" required>
                 <option value="M">Monthly</option>
                 <option value="A">Annual</option>
-            </select><br>
-            <label for="clCode">Classification Code:</label>
-            <input name="clCode" id="clCode" value="HS" required><br>
-            <label for="period">Period:</label>
-            <input name="period" id="period" value="202205" required><br>
-            <label for="reporterCode">Reporter Country:</label>
-            <select id="reporterCode" name="reporterCode"></select><br>
-            <label for="flowCode">Trade Flow:</label>
-            <select name="flowCode" id="flowCode" required>
+            </select><br />
+
+            <label for="clCodeTariff">Classification Code:</label>
+            <input name="clCode" id="clCodeTariff" value="HS" required /><br />
+
+            <label for="periodTariff">Period (YYYYMM):</label>
+            <input name="period" id="periodTariff" value="202205" pattern="\d{6}" required /><br />
+
+            <label for="reporterCodeTariff">Reporter Country:</label>
+            <select id="reporterCodeTariff" name="reporterCode" required></select><br />
+
+            <label for="partnerCodeTariff">Partner Country:</label>
+            <select id="partnerCodeTariff" name="partnerCode" required></select><br />
+
+            <label for="flowCodeTariff">Trade Flow:</label>
+            <select name="flowCode" id="flowCodeTariff" required>
                 <option value="M">Import</option>
                 <option value="X">Export</option>
-            </select><br>
+            </select><br />
+
             <button type="submit">Fetch Tariffline Data</button>
         </form>
     </div>
+
+    <!-- ========================= RESULT SECTIONS ========================= -->
     <button onclick="togglePieSection()" id="togglePieBtn">🥧 Show Pie Chart</button>
-    <div id="pieChartSection" style="display:none; margin-top:20px;">
+    <div id="pieChartSection" style="display: none; margin-top: 20px;">
         <h4>Select Column for Pie Chart:</h4>
         <select id="pieColumnSelect"></select>
-        <div style="display:flex; gap: 20px; align-items: center;">
+        <div style="display: flex; gap: 20px; align-items: center;">
             <canvas id="pieChart" width="300" height="300"></canvas>
         </div>
     </div>
+
     <div id="results">
         <h3>Results:</h3>
         <div class="column-filter" id="columnFilterContainer"></div>
 
         <button onclick="toggleCharts()" id="toggleChartBtn">📊 Show Charts</button>
-        <div id="chartContainer" style="display:none">
+        <div id="chartContainer" style="display: none;">
             <h4 id="chart1Title">Chart 1</h4>
             <canvas id="chart1" height="120"></canvas>
             <h4 id="chart2Title">Chart 2</h4>
@@ -91,39 +118,30 @@
         <div id="tableContainer">No data yet.</div>
     </div>
 
+    <!-- ========================= MAIN SCRIPT ========================= -->
     <script>
         const CLOUD_RUN_BASE = "https://uncomtrade-web-app-903823352744.europe-west1.run.app";
         let lastData = null;
         let chart1Instance = null;
         let chart2Instance = null;
+        let pieChartInstance = null;
         let activeForm = "final";
 
+        /* Default columns */
         const finalDefaultCols = [
-            "refPeriodId", "partnerDesc", "cmdDesc", "cmdCode",
-            "cifvalue", "fobvalue", "netWgt", "altQty", "reporterDesc"
+            "refPeriodId", "partnerDesc", "cmdDesc", "cmdCode", "cifvalue", "fobvalue", "netWgt", "altQty", "reporterDesc"
         ];
 
         const tariffDefaultCols = [
-            "refPeriodId", "reporterDesc", "partnerDesc", "cmdCode", "cmdDesc",
-            "qty", "qtyUnitAbbr", "altQty", "netWgt", "grossWgt", "fobvalue"
+            "refPeriodId", "reporterDesc", "partnerDesc", "cmdCode", "cmdDesc", "qty", "qtyUnitAbbr", "altQty", "netWgt", "grossWgt", "fobvalue"
         ];
 
+        /* Column display names */
         const columnNameMap = {
-            period: "DATE",
-            partnerDesc: "Partner Country",
-            cmdDesc: "HS P. Description",
-            cmdCode: "HS CODE",
-            cifvalue: "CIF Value ($)",
-            fobvalue: "FOB Value ($)",
-            netWgt: "Net Weight",
-            altQty: "Alternative Quantity",
-            flowDesc: "Trade Flow",
-            motDesc: "Logistics",
-            reporterDesc: "Reporter Country"
-
-
+            period: "DATE", partnerDesc: "Partner Country", cmdDesc: "HS Description", cmdCode: "HS CODE", cifvalue: "CIF Value ($)", fobvalue: "FOB Value ($)", netWgt: "Net Weight", altQty: "Alt Quantity", flowDesc: "Trade Flow", motDesc: "Transport", reporterDesc: "Reporter Country"
         };
 
+        /* ===================== UTILITIES ===================== */
         function toggleCharts() {
             const chartDiv = document.getElementById("chartContainer");
             const btn = document.getElementById("toggleChartBtn");
@@ -135,154 +153,6 @@
                 btn.innerText = "📊 Show Charts";
             }
         }
-
-        function renderColumnFilter(columns, defaultChecked) {
-            const container = document.getElementById("columnFilterContainer");
-            container.innerHTML = "";
-            const allKeys = Object.keys(columns[0] ?? {});
-            allKeys.forEach(key => {
-                const isChecked = defaultChecked.includes(key);
-                const labelText = columnNameMap[key] || key;
-                const label = document.createElement("label");
-                label.innerHTML = `<input type="checkbox" value="${key}" ${isChecked ? "checked" : ""}>${labelText}`;
-                container.appendChild(label);
-            });
-        }
-
-        function getSelectedColumns() {
-            return Array.from(document.querySelectorAll('#columnFilterContainer input:checked')).map(i => i.value);
-        }
-
-        function destroyCharts() {
-            if (chart1Instance) chart1Instance.destroy();
-            if (chart2Instance) chart2Instance.destroy();
-        }
-
-        function renderCharts(data) {
-            const ctx1 = document.getElementById('chart1').getContext('2d');
-            const ctx2 = document.getElementById('chart2').getContext('2d');
-
-            destroyCharts();
-
-            if (activeForm === "final") {
-                document.getElementById("chart1Title").innerText = "Top 10 Partner by Net Weight";
-                document.getElementById("chart2Title").innerText = "Transport Method Share";
-
-                const topPartners = data.slice(0, 10);
-                chart1Instance = new Chart(ctx1, {
-                    type: 'bar',
-                    data: {
-                        labels: topPartners.map(d => d.partnerDesc),
-                        datasets: [{
-                            label: 'Net Weight',
-                            data: topPartners.map(d => d.netWgt || 0),
-                            backgroundColor: '#007acc'
-                        }]
-                    },
-                    options: { responsive: true }
-                });
-
-                const motCounts = {};
-                data.forEach(d => {
-                    const mot = d.motDesc || "Unknown";
-                    motCounts[mot] = (motCounts[mot] || 0) + 1;
-                });
-
-                chart2Instance = new Chart(ctx2, {
-                    type: 'pie',
-                    data: {
-                        labels: Object.keys(motCounts),
-                        datasets: [{
-                            label: 'Transport Mode',
-                            data: Object.values(motCounts),
-                            backgroundColor: ['#007acc', '#8ecae6', '#219ebc', '#023047']
-                        }]
-                    },
-                    options: { responsive: true }
-                });
-            } else if (activeForm === "tariff") {
-                document.getElementById("chart1Title").innerText = "Top 10 Products by Quantity";
-                document.getElementById("chart2Title").innerText = "Top 10 Partners by FOB Value";
-
-                const topProducts = data.slice(0, 10);
-                chart1Instance = new Chart(ctx1, {
-                    type: 'bar',
-                    data: {
-                        labels: topProducts.map(d => d.cmdDesc || d.cmdCode),
-                        datasets: [{
-                            label: 'Quantity',
-                            data: topProducts.map(d => d.qty || 0),
-                            backgroundColor: '#f8961e'
-                        }]
-                    },
-                    options: { responsive: true }
-                });
-
-                const topFob = data
-                    .filter(d => d.fobvalue)
-                    .sort((a, b) => b.fobvalue - a.fobvalue)
-                    .slice(0, 10);
-
-                chart2Instance = new Chart(ctx2, {
-                    type: 'bar',
-                    data: {
-                        labels: topFob.map(d => d.partnerDesc),
-                        datasets: [{
-                            label: 'FOB Value',
-                            data: topFob.map(d => d.fobvalue),
-                            backgroundColor: '#f3722c'
-                        }]
-                    },
-                    options: { responsive: true }
-                });
-            }
-        }
-
-        function renderTable(data) {
-            lastData = data;
-            const selectedColumns = getSelectedColumns();
-            let html = "<table><thead><tr>" + selectedColumns.map(k => `<th>${columnNameMap[k] || k}</th>`).join("") + "</tr></thead><tbody>";
-
-            html += data.map(row => {
-                return "<tr>" + selectedColumns.map(k => {
-                    let value = row[k] ?? "";
-                    if (k === "motDesc") {
-                        if (value.toLowerCase().includes("air")) value = "✈️ " + value;
-                        else if (value.toLowerCase().includes("sea")) value = "🚢 " + value;
-                    }
-                    return `<td>${value}</td>`;
-                }).join("") + "</tr>";
-            }).join("");
-
-            html += "</tbody></table>";
-            document.getElementById("tableContainer").innerHTML = html;
-            renderCharts(data);
-        }
-
-        async function handleForm(endpoint, form, defaultCols, formName) {
-            activeForm = formName;
-            const params = new URLSearchParams(new FormData(form)).toString();
-            const res = await fetch(`${CLOUD_RUN_BASE}/${endpoint}?${params}`);
-            const json = await res.json();
-            renderColumnFilter(json, defaultCols);
-            renderTable(json);
-        }
-
-        document.getElementById("finalForm").addEventListener("submit", async (e) => {
-            e.preventDefault();
-            await handleForm("final-data", e.target, finalDefaultCols, "final");
-        });
-
-        document.getElementById("tariffForm").addEventListener("submit", async (e) => {
-            e.preventDefault();
-            await handleForm("tariffline-data", e.target, tariffDefaultCols, "tariff");
-        });
-
-        document.getElementById("columnFilterContainer").addEventListener("change", () => {
-            if (lastData) renderTable(lastData);
-        });
-    </script>
-    <script>let pieChartInstance = null;
 
         function togglePieSection() {
             const section = document.getElementById("pieChartSection");
@@ -298,95 +168,179 @@
             }
         }
 
+        function renderColumnFilter(rows, defaultChecked) {
+            const container = document.getElementById("columnFilterContainer");
+            container.innerHTML = "";
+            const allKeys = Object.keys(rows[0] ?? {});
+            allKeys.forEach(key => {
+                const isChecked = defaultChecked.includes(key);
+                const label = document.createElement("label");
+                label.innerHTML = `<input type="checkbox" value="${key}" ${isChecked ? "checked" : ""}>${columnNameMap[key] || key}`;
+                container.appendChild(label);
+            });
+        }
+
+        function getSelectedColumns() {
+            return Array.from(document.querySelectorAll('#columnFilterContainer input:checked')).map(i => i.value);
+        }
+
+        function destroyCharts() {
+            if (chart1Instance) chart1Instance.destroy();
+            if (chart2Instance) chart2Instance.destroy();
+        }
+
+        /* ===================== CHARTS ===================== */
+        function renderCharts(data) {
+            const ctx1 = document.getElementById('chart1').getContext('2d');
+            const ctx2 = document.getElementById('chart2').getContext('2d');
+            destroyCharts();
+
+            if (activeForm === "final") {
+                // Bar - Top 10 partners by net weight
+                document.getElementById("chart1Title").innerText = "Top 10 Partners by Net Weight";
+                const topPartners = data.slice(0, 10);
+                chart1Instance = new Chart(ctx1, {
+                    type: 'bar',
+                    data: {
+                        labels: topPartners.map(d => d.partnerDesc),
+                        datasets: [{ label: 'Net Weight', data: topPartners.map(d => d.netWgt || 0) }]
+                    },
+                    options: { responsive: true }
+                });
+
+                // Pie - transport modes
+                document.getElementById("chart2Title").innerText = "Transport Mode Distribution";
+                const motCounts = {};
+                data.forEach(d => {
+                    const mot = d.motDesc || "Unknown";
+                    motCounts[mot] = (motCounts[mot] || 0) + 1;
+                });
+                chart2Instance = new Chart(ctx2, {
+                    type: 'pie',
+                    data: { labels: Object.keys(motCounts), datasets: [{ data: Object.values(motCounts) }] },
+                    options: { responsive: true }
+                });
+            } else {
+                // Tariff-specific charts
+                document.getElementById("chart1Title").innerText = "Top 10 Products by Quantity";
+                const topProducts = data.slice(0, 10);
+                chart1Instance = new Chart(ctx1, {
+                    type: 'bar',
+                    data: {
+                        labels: topProducts.map(d => d.cmdDesc || d.cmdCode),
+                        datasets: [{ label: 'Quantity', data: topProducts.map(d => d.qty || 0) }]
+                    },
+                    options: { responsive: true }
+                });
+
+                document.getElementById("chart2Title").innerText = "Top 10 Partners by FOB Value";
+                const topFob = data.filter(d => d.fobvalue).sort((a, b) => b.fobvalue - a.fobvalue).slice(0, 10);
+                chart2Instance = new Chart(ctx2, {
+                    type: 'bar',
+                    data: {
+                        labels: topFob.map(d => d.partnerDesc),
+                        datasets: [{ label: 'FOB Value', data: topFob.map(d => d.fobvalue) }]
+                    },
+                    options: { responsive: true }
+                });
+            }
+        }
+
+        /* ===================== TABLE ===================== */
+        function renderTable(rows) {
+            lastData = rows;
+            const selectedCols = getSelectedColumns();
+            const thead = selectedCols.map(k => `<th>${columnNameMap[k] || k}</th>`).join("");
+            const tbody = rows.map(r => {
+                const tds = selectedCols.map(k => `<td>${r[k] ?? ""}</td>`).join("");
+                return `<tr>${tds}</tr>`;
+            }).join("");
+            document.getElementById("tableContainer").innerHTML = `<table><thead><tr>${thead}</tr></thead><tbody>${tbody}</tbody></table>`;
+            renderCharts(rows);
+        }
+
+        /* ===================== API HANDLER ===================== */
+        async function handleForm(endpoint, formEl, defaultCols, formName) {
+            try {
+                activeForm = formName;
+                const params = new URLSearchParams(new FormData(formEl)).toString();
+                const res = await fetch(`${CLOUD_RUN_BASE}/${endpoint}?${params}`);
+                if (!res.ok) throw new Error(`HTTP ${res.status}`);
+                const json = await res.json();
+                renderColumnFilter(json, defaultCols);
+                renderTable(json);
+            } catch (err) {
+                alert("Error fetching data: " + err.message);
+                console.error(err);
+            }
+        }
+
+        document.getElementById("finalForm").addEventListener("submit", e => {
+            e.preventDefault();
+            handleForm("final-data", e.target, finalDefaultCols, "final");
+        });
+
+        document.getElementById("tariffForm").addEventListener("submit", e => {
+            e.preventDefault();
+            handleForm("tariffline-data", e.target, tariffDefaultCols, "tariff");
+        });
+
+        document.getElementById("columnFilterContainer").addEventListener("change", () => {
+            if (lastData) renderTable(lastData);
+        });
+
+        /* ===================== PIE CHART ===================== */
         function populatePieColumnSelect() {
             const select = document.getElementById("pieColumnSelect");
             select.innerHTML = "";
-            const columns = getSelectedColumns();
-            columns.forEach(col => {
+            getSelectedColumns().forEach(col => {
                 const option = document.createElement("option");
                 option.value = col;
                 option.text = columnNameMap[col] || col;
                 select.appendChild(option);
             });
-            select.addEventListener("change", () => renderPieChart(select.value));
-            if (columns.length) renderPieChart(columns[0]);
+            select.onchange = () => renderPieChart(select.value);
+            if (select.options.length) renderPieChart(select.value);
         }
 
-        function renderPieChart(columnName) {
-            if (!lastData || !columnName) return;
-
+        function renderPieChart(col) {
+            if (!lastData || !col) return;
             const grouped = {};
-            lastData.forEach(row => {
-                const key = row[columnName] ?? "Unknown";
+            lastData.forEach(r => {
+                const key = r[col] || "Unknown";
                 grouped[key] = (grouped[key] || 0) + 1;
             });
-
-            const labels = Object.keys(grouped);
-            const values = Object.values(grouped);
-
             const ctx = document.getElementById("pieChart").getContext("2d");
             if (pieChartInstance) pieChartInstance.destroy();
-
             pieChartInstance = new Chart(ctx, {
                 type: "pie",
-                data: {
-                    labels: labels,
-                    datasets: [{
-                        label: columnName,
-                        data: values,
-                        backgroundColor: labels.map((_, i) =>
-                            `hsl(${(i * 47) % 360}, 70%, 60%)`
-                        )
-                    }]
-                },
+                data: { labels: Object.keys(grouped), datasets: [{ data: Object.values(grouped) }] },
                 options: { responsive: true }
-            });
-        }</script>
-    <script>
-        const countries = [
-            { code: "0", name: "World" },
-            { code: "4", name: "Afghanistan" },
-            { code: "8", name: "Albania" },
-            { code: "12", name: "Algeria" },
-            { code: "36", name: "Australia" },
-            { code: "40", name: "Austria" },
-            { code: "50", name: "Bangladesh" },
-            { code: "76", name: "Brazil" },
-            { code: "124", name: "Canada" },
-            { code: "156", name: "China" },
-            { code: "276", name: "Germany" },
-            { code: "356", name: "India" },
-            { code: "392", name: "Japan" },
-            { code: "643", name: "Russia" },
-            { code: "792", name: "Turkey" },
-            { code: "826", name: "United Kingdom" },
-            { code: "840", name: "United States" }
-            // Tüm listeyi uzatabilirim istersen
-        ];
-
-        function populateCountrySelect(elementId) {
-            const select = document.getElementById(elementId);
-            countries.forEach(c => {
-                const option = document.createElement("option");
-                option.value = c.code;
-                option.text = c.name;
-                select.appendChild(option);
-            });
-
-            new Choices(select, {
-                searchEnabled: true,
-                itemSelectText: '',
-                shouldSort: true
             });
         }
 
-        // Form açıldığında select'leri doldur
+        /* ===================== COUNTRY DROPDOWN ===================== */
+        const countries = [
+            { code: "0", name: "World" }, { code: "4", name: "Afghanistan" }, { code: "8", name: "Albania" }, { code: "12", name: "Algeria" }, { code: "36", name: "Australia" }, { code: "40", name: "Austria" }, { code: "50", name: "Bangladesh" }, { code: "76", name: "Brazil" }, { code: "124", name: "Canada" }, { code: "156", name: "China" }, { code: "276", name: "Germany" }, { code: "356", name: "India" }, { code: "392", name: "Japan" }, { code: "643", name: "Russia" }, { code: "792", name: "Turkey" }, { code: "826", name: "United Kingdom" }, { code: "840", name: "United States" }
+        ];
+
+        function populateCountrySelect(id) {
+            const sel = document.getElementById(id);
+            countries.forEach(c => {
+                const opt = document.createElement("option");
+                opt.value = c.code;
+                opt.text = c.name;
+                sel.appendChild(opt);
+            });
+            new Choices(sel, { searchEnabled: true, itemSelectText: '', shouldSort: true });
+        }
+
         document.addEventListener("DOMContentLoaded", () => {
-            populateCountrySelect("reporterCode");
-            populateCountrySelect("partnerCode");
+            ["reporterCodeFinal", "partnerCodeFinal", "reporterCodeTariff", "partnerCodeTariff"].forEach(populateCountrySelect);
         });
     </script>
-    <div>&copy; True Digital Team 2025</div>
+
+    <div style="margin-top:40px; text-align:center;">&copy; True Digital Team 2025</div>
 </body>
 
 </html>
