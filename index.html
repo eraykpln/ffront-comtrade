@@ -14,14 +14,41 @@
     <div class="flex">
         <form id="finalForm">
             <h3>Final Data Query</h3>
-            <input name="typeCode" value="C" required><br>
-            <input name="freqCode" value="M" required><br>
-            <input name="clCode" value="HS" required><br>
-            <input name="period" value="202205" required><br>
+            <label for="typeCode">Type:</label>
+            <select name="typeCode" id="typeCode" required>
+                <option value="C">Commodities</option>
+                <option value="S">Services</option>
+            </select><br>
+
+            <!-- Frequency Code: Monthly or Annually -->
+            <label for="freqCode">Frequency:</label>
+            <select name="freqCode" id="freqCode" required>
+                <option value="M">Monthly</option>
+                <option value="A">Annually</option>
+            </select><br>
+
+            <!-- Classification Code -->
+            <label for="clCode">Classification:</label>
+            <input name="clCode" id="clCode" value="HS" required><br>
+
+            <!-- Period -->
+            <label for="period">Period (YYYYMM):</label>
+            <input name="period" id="period" value="202205" required><br>
+
+            <!-- Reporter Code (to be populated dynamically) -->
+            <label for="reporterCode">Reporter:</label>
             <select id="reporterCode" name="reporterCode" required></select><br>
-            <input name="cmdCode" value="91" required><br>
-            <input name="flowCode" value="M" required><br>
-            <button type="submit">Fetch Final Data</button>
+
+            <!-- Commodity Code -->
+            <label for="cmdCode">Commodity Code:</label>
+            <input name="cmdCode" id="cmdCode" value="91" required><br>
+
+            <!-- Flow Code: Import or Export -->
+            <label for="flowCode">Trade Flow:</label>
+            <select name="flowCode" id="flowCode" required>
+                <option value="M">Import</option>
+                <option value="X">Export</option>
+            </select><br>
         </form>
 
         <form id="tariffForm">
