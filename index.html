@@ -140,7 +140,7 @@
 
         const countries = [{ code: "0", name: "World" }, { code: "4", name: "Afghanistan" }, { code: "8", name: "Albania" }, { code: "12", name: "Algeria" }, { code: "36", name: "Australia" }, { code: "40", name: "Austria" }, { code: "50", name: "Bangladesh" }, { code: "76", name: "Brazil" }, { code: "124", name: "Canada" }, { code: "156", name: "China" }, { code: "276", name: "Germany" }, { code: "356", name: "India" }, { code: "392", name: "Japan" }, { code: "643", name: "Russia" }, { code: "792", name: "Turkey" }, { code: "826", name: "United Kingdom" }, { code: "840", name: "United States" }];
         function populateCountrySelect(id) { const sel = document.getElementById(id); countries.forEach(c => { const opt = document.createElement("option"); opt.value = c.code; opt.text = c.name; sel.appendChild(opt); }); new Choices(sel, { searchEnabled: true, itemSelectText: '', shouldSort: true }); }
-        document.addEventListener("DOMContentLoaded", () => { "reporterCodeFinal,partnerCodeFinal,reporterCodeTariff,partnerCodeTariff".split(',').forEach(populateCountrySelect));});
+        document.addEventListener("DOMContentLoaded", () => { "reporterCodeFinal,partnerCodeFinal,reporterCodeTariff,partnerCodeTariff".split(',').forEach(populateCountrySelect); });
     </script>
     <div style="margin-top:40px;text-align:center">&copy; True Digital Team 2025</div>
 </body>
