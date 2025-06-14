@@ -2,42 +2,43 @@
 <html lang="en">
 
 <head>
-    <meta charset="UTF-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Comtrade API Tester</title>
-    <link rel="stylesheet" href="style.css" />
-    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/choices.js/public/assets/styles/choices.min.css" />
+    <link rel="stylesheet" href="style.css">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/choices.js/public/assets/styles/choices.min.css">
     <script src="https://cdn.jsdelivr.net/npm/choices.js/public/assets/scripts/choices.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 </head>
 
 <body>
     <h2>Comtrade API Query Panel</h2>
+
     <div class="flex">
         <!-- Final Data Form -->
         <form id="finalForm">
             <h3>Final Data Query</h3>
-            <label for="typeCodeFinal">Data Type:</label>
+            <label>Data Type:</label>
             <select id="typeCodeFinal" name="typeCode" required>
                 <option value="C">Commodity</option>
                 <option value="S">Services</option>
             </select><br>
-            <label for="freqCodeFinal">Frequency:</label>
+            <label>Frequency:</label>
             <select id="freqCodeFinal" name="freqCode" required>
                 <option value="M">Monthly</option>
                 <option value="A">Annual</option>
             </select><br>
-            <label for="clCodeFinal">Classification Code:</label>
+            <label>Classification Code:</label>
             <input id="clCodeFinal" name="clCode" value="HS" required><br>
-            <label for="periodFinal">Period (YYYYMM):</label>
+            <label>Period (YYYYMM):</label>
             <input id="periodFinal" name="period" value="202205" pattern="\d{6}" required><br>
-            <label for="reporterCodeFinal">Reporter Country:</label>
+            <label>Reporter Country:</label>
             <select id="reporterCodeFinal" name="reporterCode" required></select><br>
-            <label for="partnerCodeFinal">Partner Country:</label>
+            <label>Partner Country:</label>
             <select id="partnerCodeFinal" name="partnerCode" required></select><br>
-            <label for="cmdCodeFinal">Commodity Code (HS6):</label>
+            <label>Commodity Code (HS6):</label>
             <input id="cmdCodeFinal" name="cmdCode" value="91" required><br>
-            <label for="flowCodeFinal">Trade Flow:</label>
+            <label>Trade Flow:</label>
             <select id="flowCodeFinal" name="flowCode" required>
                 <option value="M">Import</option>
                 <option value="X">Export</option>
@@ -48,25 +49,27 @@
         <!-- Tariffline Data Form -->
         <form id="tariffForm">
             <h3>Tariffline Data Query</h3>
-            <label for="typeCodeTariff">Data Type:</label>
+            <label>Data Type:</label>
             <select id="typeCodeTariff" name="typeCode" required>
                 <option value="C">Commodity</option>
                 <option value="S">Services</option>
             </select><br>
-            <label for="freqCodeTariff">Frequency:</label>
+            <label>Frequency:</label>
             <select id="freqCodeTariff" name="freqCode" required>
                 <option value="M">Monthly</option>
                 <option value="A">Annual</option>
             </select><br>
-            <label for="clCodeTariff">Classification Code:</label>
+            <label>Classification Code:</label>
             <input id="clCodeTariff" name="clCode" value="HS" required><br>
-            <label for="periodTariff">Period (YYYYMM):</label>
+            <label>Period (YYYYMM):</label>
             <input id="periodTariff" name="period" value="202205" pattern="\d{6}" required><br>
-            <label for="reporterCodeTariff">Reporter Country:</label>
+            <label>Reporter Country:</label>
             <select id="reporterCodeTariff" name="reporterCode" required></select><br>
-            <label for="partnerCodeTariff">Partner Country:</label>
+            <label>Partner Country:</label>
             <select id="partnerCodeTariff" name="partnerCode" required></select><br>
-            <label for="flowCodeTariff">Trade Flow:</label>
+            <label>Commodity Code (HS6):</label>
+            <input id="cmdCodeTariff" name="cmdCode" placeholder="e.g. 2701" required><br>
+            <label>Trade Flow:</label>
             <select id="flowCodeTariff" name="flowCode" required>
                 <option value="M">Import</option>
                 <option value="X">Export</option>
@@ -75,7 +78,7 @@
         </form>
     </div>
 
-    <!-- Pie chart section -->
+    <!-- Pie Chart Only -->
     <button id="togglePieBtn" onclick="togglePieSection()">🥧 Show Pie Chart</button>
     <div id="pieChartSection" style="display:none;margin-top:20px;">
         <h4>Select Column for Pie Chart:</h4>
@@ -89,60 +92,42 @@
     <div id="results">
         <h3>Results:</h3>
         <div id="columnFilterContainer" class="column-filter"></div>
-        <button id="toggleChartBtn" onclick="toggleCharts()">📊 Show Charts</button>
-        <div id="chartContainer" style="display:none;">
-            <h4 id="chart1Title">Chart 1</h4>
-            <canvas id="chart1" height="120"></canvas>
-            <h4 id="chart2Title">Chart 2</h4>
-            <canvas id="chart2" height="120"></canvas>
-        </div>
         <div id="tableContainer">No data yet.</div>
     </div>
 
     <script>
+        // Config & Globals
         const CLOUD_RUN_BASE = "https://uncomtrade-web-app-903823352744.europe-west1.run.app";
-        let lastData = null;
-        let chart1Instance = null;
-        let chart2Instance = null;
-        let pieChartInstance = null;
-        let activeForm = "final";
+        let lastData = null, pieChartInstance = null, activeForm = "final";
 
-        const finalDefaultCols = ["refPeriodId", "partnerDesc", "cmdDesc", "cmdCode", "cifvalue", "fobvalue", "netWgt", "altQty", "reporterDesc"];
-        const tariffDefaultCols = ["refPeriodId", "reporterDesc", "partnerDesc", "cmdCode", "cmdDesc", "qty", "qtyUnitAbbr", "altQty", "netWgt", "grossWgt", "fobvalue"];
-        const columnNameMap = { period: "DATE", partnerDesc: "Partner Country", cmdDesc: "HS Description", cmdCode: "HS CODE", cifvalue: "CIF Value ($)", fobvalue: "FOB Value ($)", netWgt: "Net Weight", altQty: "Alt Qty", flowDesc: "Trade Flow", motDesc: "Transport", reporterDesc: "Reporter Country" };
+        const finalCols = ["refPeriodId", "partnerDesc", "cmdDesc", "cmdCode", "cifvalue", "fobvalue", "netWgt", "altQty", "reporterDesc"];
+        const tariffCols = ["refPeriodId", "reporterDesc", "partnerDesc", "cmdCode", "cmdDesc", "qty", "qtyUnitAbbr", "altQty", "netWgt", "grossWgt", "fobvalue"];
+        const colName = { period: "DATE", partnerDesc: "Partner", cmdDesc: "Description", cmdCode: "HS CODE", cifvalue: "CIF ($)", fobvalue: "FOB ($)", netWgt: "NetWgt", altQty: "AltQty", flowDesc: "Flow", motDesc: "Transport", reporterDesc: "Reporter" };
 
-        function toggleCharts() { const c = document.getElementById("chartContainer"), b = document.getElementById("toggleChartBtn"); if (c.style.display === "none") { c.style.display = "block"; b.innerText = "📉 Hide Charts" } else { c.style.display = "none"; b.innerText = "📊 Show Charts" } }
+        // Country List
+        const countries = [{ code: "0", name: "World" }, { code: "36", name: "Australia" }, { code: "40", name: "Austria" }, { code: "50", name: "Bangladesh" }, { code: "76", name: "Brazil" }, { code: "124", name: "Canada" }, { code: "156", name: "China" }, { code: "276", name: "Germany" }, { code: "356", name: "India" }, { code: "392", name: "Japan" }, { code: "643", name: "Russia" }, { code: "792", name: "Turkey" }, { code: "826", name: "United Kingdom" }, { code: "840", name: "United States" }];
+        function populateSelect(id) { const sel = document.getElementById(id); countries.forEach(c => { const o = document.createElement('option'); o.value = c.code; o.text = c.name; sel.appendChild(o); }); new Choices(sel, { searchEnabled: true, itemSelectText: '', shouldSort: true }); }
+        document.addEventListener('DOMContentLoaded', () => { "reporterCodeFinal,partnerCodeFinal,reporterCodeTariff,partnerCodeTariff".split(',').forEach(populateSelect));});
 
-        function togglePieSection() { const s = document.getElementById("pieChartSection"), b = document.getElementById("togglePieBtn"); if (s.style.display === "none") { s.style.display = "block"; b.innerText = "🥧 Hide Pie Chart"; populatePieColumnSelect(); } else { s.style.display = "none"; b.innerText = "🥧 Show Pie Chart"; if (pieChartInstance) pieChartInstance.destroy(); } }
+        // UI toggles
+        function togglePieSection() { const s = document.getElementById('pieChartSection'); const btn = document.getElementById('togglePieBtn'); if (s.style.display === 'none') { s.style.display = 'block'; btn.innerText = '🥧 Hide Pie Chart'; populatePieSelect(); } else { s.style.display = 'none'; btn.innerText = '🥧 Show Pie Chart'; pieChartInstance && pieChartInstance.destroy(); } }
 
-        function renderColumnFilter(rows, defaults) { const c = document.getElementById("columnFilterContainer"); c.innerHTML = ""; if (!rows.length) return; const keys = Object.keys(rows[0]); keys.forEach(k => { const lbl = document.createElement("label"); lbl.innerHTML = `<input type="checkbox" value="${k}" ${defaults.includes(k) ? "checked" : ""}>${columnNameMap[k] || k}`; c.appendChild(lbl); }); }
-        function getSelectedColumns() { return Array.from(document.querySelectorAll('#columnFilterContainer input:checked')).map(i => i.value); }
-        function destroyCharts() { if (chart1Instance) chart1Instance.destroy(); if (chart2Instance) chart2Instance.destroy(); }
+        // Column filter
+        function renderFilter(rows, defaults) { const c = document.getElementById('columnFilterContainer'); c.innerHTML = ''; if (!rows.length) return; Object.keys(rows[0]).forEach(k => { const l = document.createElement('label'); l.innerHTML = `<input type='checkbox' value='${k}' ${defaults.includes(k) ? 'checked' : ''}>${colName[k] || k}`; c.appendChild(l); }); }
+        const selCols = () => Array.from(document.querySelectorAll('#columnFilterContainer input:checked')).map(e => e.value);
 
-        function renderCharts(rows) {
-            const ctx1 = document.getElementById('chart1').getContext('2d'); const ctx2 = document.getElementById('chart2').getContext('2d'); destroyCharts(); if (!rows.length) return;
-            if (activeForm === "final") { document.getElementById("chart1Title").innerText = "Top 10 Partners by Net Weight"; const top = rows.slice(0, 10); chart1Instance = new Chart(ctx1, { type: 'bar', data: { labels: top.map(d => d.partnerDesc), datasets: [{ label: 'NetWgt', data: top.map(d => d.netWgt || 0) }] }, options: { responsive: true } }); const mot = {}; rows.forEach(d => { const m = d.motDesc || "Unknown"; mot[m] = (mot[m] || 0) + 1 }); chart2Instance = new Chart(ctx2, { type: 'pie', data: { labels: Object.keys(mot), datasets: [{ data: Object.values(mot) }] }, options: { responsive: true } }); } else { document.getElementById("chart1Title").innerText = "Top 10 Products by Qty"; const prod = rows.slice(0, 10); chart1Instance = new Chart(ctx1, { type: 'bar', data: { labels: prod.map(d => d.cmdDesc || d.cmdCode), datasets: [{ label: 'Qty', data: prod.map(d => d.qty || 0) }] }, options: { responsive: true } }); document.getElementById("chart2Title").innerText = "Top 10 Partners by FOB"; const fob = rows.filter(d => d.fobvalue).sort((a, b) => b.fobvalue - a.fobvalue).slice(0, 10); chart2Instance = new Chart(ctx2, { type: 'bar', data: { labels: fob.map(d => d.partnerDesc), datasets: [{ label: 'FOB', data: fob.map(d => d.fobvalue) }] }, options: { responsive: true } }); }
-        }
+        // Table
+        function renderTable(rows) { lastData = rows; const cols = selCols(); if (!cols.length || !rows.length) { document.getElementById('tableContainer').innerText = 'No data.'; return; } const head = cols.map(k => `<th>${colName[k] || k}</th>`).join(''); const body = rows.map(r => `<tr>${cols.map(k => `<td>${r[k] ?? ''}</td>`).join('')}</tr>`).join(''); document.getElementById('tableContainer').innerHTML = `<table><thead><tr>${head}</tr></thead><tbody>${body}</tbody></table>`; }
 
-        function renderTable(rows) { lastData = rows; const cols = getSelectedColumns(); if (!cols.length || !rows.length) { document.getElementById("tableContainer").innerHTML = "No data."; return; } const head = cols.map(k => `<th>${columnNameMap[k] || k}</th>`).join(""); const body = rows.map(r => `<tr>${cols.map(k => `<td>${r[k] ?? ""}</td>`).join("")}</tr>`).join(""); document.getElementById("tableContainer").innerHTML = `<table><thead><tr>${head}</tr></thead><tbody>${body}</tbody></table>`; renderCharts(rows); }
+        // Pie chart
+        function populatePieSelect() { const sel = document.getElementById('pieColumnSelect'); sel.innerHTML = ''; selCols().forEach(k => { const o = document.createElement('option'); o.value = k; o.text = colName[k] || k; sel.appendChild(o); }); sel.onchange = () => drawPie(sel.value); if (sel.options.length) drawPie(sel.value); }
+        function drawPie(col) { if (!lastData || !col) return; const grp = {}; lastData.forEach(r => { const key = r[col] || 'Unknown'; grp[key] = (grp[key] || 0) + 1; }); const ctx = document.getElementById('pieChart').getContext('2d'); pieChartInstance && pieChartInstance.destroy(); pieChartInstance = new Chart(ctx, { type: 'pie', data: { labels: Object.keys(grp), datasets: [{ data: Object.values(grp) }] }, options: { responsive: true } }); }
 
-        function normalizeRows(json) { if (Array.isArray(json)) return json; if (json.data && Array.isArray(json.data)) return json.data; if (json.results && Array.isArray(json.results)) return json.results; return []; }
+        // API helper
+        function normalize(j) { if (Array.isArray(j)) return j; if (j.data && Array.isArray(j.data)) return j.data; if (j.results && Array.isArray(j.results)) return j.results; return []; }
+        async function fetchData(endpoint, form, defaults, name) { try { activeForm = name; const qs = new URLSearchParams(new FormData(form)); const res = await fetch(`${CLOUD_RUN_BASE}/${endpoint}?${qs}`); if (!res.ok) throw new Error(`HTTP ${res.status}`); const rows = normalize(await res.json()); if (!rows.length) throw new Error('No rows'); renderFilter(rows, defaults); renderTable(rows); } catch (err) { alert('Error: ' + err.message); } }
 
-        async function handleForm(endpoint, formEl, defaults, name) { try { activeForm = name; const params = new URLSearchParams(new FormData(formEl)); const res = await fetch(`${CLOUD_RUN_BASE}/${endpoint}?${params}`); if (!res.ok) throw new Error(`HTTP ${res.status}`); const json = await res.json(); const rows = normalizeRows(json); if (!rows.length) throw new Error("Empty dataset returned"); renderColumnFilter(rows, defaults); renderTable(rows); } catch (err) { alert("Error fetching data: " + err.message); console.error(err); } }
-
-        document.getElementById("finalForm").addEventListener("submit", e => { e.preventDefault(); handleForm("final-data", e.target, finalDefaultCols, "final"); });
-        document.getElementById("tariffForm").addEventListener("submit", e => { e.preventDefault(); handleForm("tariffline-data", e.target, tariffDefaultCols, "tariff"); });
-        document.getElementById("columnFilterContainer").addEventListener("change", () => { if (lastData) renderTable(lastData); });
-
-        function populatePieColumnSelect() { const sel = document.getElementById("pieColumnSelect"); sel.innerHTML = ""; getSelectedColumns().forEach(k => { const op = document.createElement("option"); op.value = k; op.text = columnNameMap[k] || k; sel.appendChild(op); }); sel.onchange = () => renderPieChart(sel.value); if (sel.options.length) renderPieChart(sel.value); }
-
-        function renderPieChart(col) { if (!lastData || !col) return; const grp = {}; lastData.forEach(r => { const key = r[col] || "Unknown"; grp[key] = (grp[key] || 0) + 1; }); const ctx = document.getElementById("pieChart").getContext("2d"); if (pieChartInstance) pieChartInstance.destroy(); pieChartInstance = new Chart(ctx, { type: "pie", data: { labels: Object.keys(grp), datasets: [{ data: Object.values(grp) }] }, options: { responsive: true } }); }
-
-        const countries = [{ code: "0", name: "World" }, { code: "4", name: "Afghanistan" }, { code: "8", name: "Albania" }, { code: "12", name: "Algeria" }, { code: "36", name: "Australia" }, { code: "40", name: "Austria" }, { code: "50", name: "Bangladesh" }, { code: "76", name: "Brazil" }, { code: "124", name: "Canada" }, { code: "156", name: "China" }, { code: "276", name: "Germany" }, { code: "356", name: "India" }, { code: "392", name: "Japan" }, { code: "643", name: "Russia" }, { code: "792", name: "Turkey" }, { code: "826", name: "United Kingdom" }, { code: "840", name: "United States" }];
-        function populateCountrySelect(id) { const sel = document.getElementById(id); countries.forEach(c => { const opt = document.createElement("option"); opt.value = c.code; opt.text = c.name; sel.appendChild(opt); }); new Choices(sel, { searchEnabled: true, itemSelectText: '', shouldSort: true }); }
-        document.addEventListener("DOMContentLoaded", () => { "reporterCodeFinal,partnerCodeFinal,reporterCodeTariff,partnerCodeTariff".split(',').forEach(populateCountrySelect); });
+        document.getElementById('finalForm').addEventListener('submit', e => { e.preventDefault(); fetchData('final-data', e.target, finalCols, 'final'); });
+        document.getElementById('tariffForm').addEventListener('submit', e => { e.preventDefault(); fetchData('tariffline-data', e.target, tariffCols, 'tariff'); });
+        document.getElementById('columnFilterContainer').addEventListener('change', () => { if (lastData) renderTable(lastData); });
     </script>
-    <div style="margin-top:40px;text-align:center">&copy; True Digital Team 2025</div>
-</body>
-
-</html>
